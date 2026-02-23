@@ -38,10 +38,14 @@ See exactly where your tokens go: which projects, which sessions, which prompts,
 ## Install
 
 ```bash
-# Run instantly without installing
+# Homebrew (macOS / Linux)
+brew tap GauravRatnawat/claudetop https://github.com/GauravRatnawat/claudetop
+brew install claudetop
+
+# npm — run instantly without installing
 npx claudetop
 
-# Or install globally
+# npm — install globally
 npm install -g claudetop
 claudetop
 ```
