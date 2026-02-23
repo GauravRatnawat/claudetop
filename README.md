@@ -1,6 +1,13 @@
-# claudetop
+# claudetop — Claude Code Token Usage Dashboard
 
-> A terminal dashboard for [Claude Code](https://claude.ai/code) that shows exactly where your tokens went — no browser, no server, no config.
+[![npm version](https://img.shields.io/npm/v/claudetop)](https://www.npmjs.com/package/claudetop)
+[![npm downloads](https://img.shields.io/npm/dm/claudetop)](https://www.npmjs.com/package/claudetop)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node.js >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+
+**claudetop** is an interactive terminal dashboard for tracking [Claude Code](https://claude.ai/code) token usage and API cost — like `htop`, but for your Claude AI spending.
+
+See exactly where your tokens go: which projects, which sessions, which prompts, and which models are costing you the most — directly in your terminal, with no browser, no server, and no configuration needed.
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
@@ -9,56 +16,64 @@
   [1] Dashboard  [2] Daily  [3] Sessions  [4] Projects  [5] Prompts  [6] Insights  [7] Analytics
 ```
 
-Reads `~/.claude/` directly. Nothing is written. Nothing is sent anywhere.
+---
+
+## Why claudetop?
+
+- **Instant** — reads `~/.claude/` directly, renders in under a second
+- **Offline** — zero network calls, ever. Your prompts never leave your machine
+- **SSH-friendly** — works over SSH, unlike browser dashboards
+- **Scriptable** — `--json`, `--summary`, `--today` for cron jobs and shell pipes
+- **Cost-aware** — tracks all four billing categories: raw input, cache writes, cache reads, and output tokens
 
 ---
 
 ## Install
 
 ```bash
-# Run without installing
+# Run instantly without installing
 npx claudetop
 
-# Install globally
+# Or install globally
 npm install -g claudetop
 claudetop
 ```
 
-**Requirements:** Node.js 18+ · macOS / Linux / WSL · Terminal ≥ 80×24  
+**Requirements:** Node.js 18+ · macOS / Linux / WSL · Terminal ≥ 80×24
 Claude Code must have been run at least once (creates `~/.claude/`).
 
 ---
 
-## What it shows
+## Features — 7 Views
 
-### `[1]` Dashboard
-All-time stat cards (tokens, cost, sessions, daily average), today's burn rate, 7-day bar chart, model breakdown, token type breakdown (raw / cache-created / cache-read / output), and top 3 insights.
+### `[1]` Dashboard — Claude Code Usage Overview
+All-time stat cards (total tokens, total cost, sessions, daily average), today's burn rate and cost projection, 7-day token bar chart, model breakdown with cache token split (raw / cache-created / cache-read / output), and top 3 actionable insights.
 
-### `[2]` Daily
-Reverse-chronological per-day table with input/output tokens, cost, session count, and day-over-day delta. Press `Enter` on any row to expand a detail panel showing model breakdown, busiest hour, top project, and week-over-week delta.
+### `[2]` Daily — Per-Day Token & Cost Breakdown
+Reverse-chronological daily usage table with input/output tokens, cost, session count, and day-over-day delta. Press `Enter` to expand a detail panel: model breakdown, busiest hour, top project, and week-over-week comparison.
 
-### `[3]` Sessions
-All sessions with date, project, first prompt, model (colour-coded), message count, tokens, cost, and efficiency %. Searchable (`/`), sortable (`s`), filterable by model (`o` for Opus-only, `h` for Haiku-only). Press `Enter` to drill into every query turn with per-turn token and cost breakdown.
+### `[3]` Sessions — Searchable Claude Session History
+Full session list with date, project, first prompt, model (colour-coded by type), message count, tokens, cost, and efficiency score. Searchable, sortable, and filterable by model. Press `Enter` to drill into every query turn with per-turn token and cost breakdown.
 
-### `[4]` Projects
-Per-project usage with token bar and cost. Press `Enter` to expand the top 10 most expensive prompts for that project, with tool counts, date, and model.
+### `[4]` Projects — Token Cost by Project
+Per-project usage aggregated with token bar and total cost. Press `Enter` to expand the 10 most expensive prompts for that project, with tool call counts, date, and model used.
 
-### `[5]` Prompts
-Top 50 most token-expensive prompts across all projects. Short/vague prompts are flagged `⚠`. Press `Enter` to expand the full prompt text, input/output split, cost, and model.
+### `[5]` Prompts — Most Expensive Claude Prompts
+Top 50 most token-expensive prompts across all projects and sessions. Short or vague prompts (like "yes", "continue", "fix it") are flagged with `⚠` as waste signals. Press `Enter` to expand the full text, input/output split, cost, and model.
 
-### `[6]` Insights
-Up to 13 auto-generated behavioral insights (warnings + info). Each shows a title, description, and an actionable tip. Press `Enter` to expand.
+### `[6]` Insights — AI Usage Insights & Cost Reduction Tips
+Up to 13 auto-generated behavioral insights with warnings and info. Covers vague prompts, context growth, marathon sessions, model mismatch, tool-heavy conversations, weekly velocity, and budget alerts — each with a concrete action to reduce spend.
 
-### `[7]` Analytics
-- **Tool usage** — call counts, sessions used in, token totals per tool
-- **Session length histogram** — 5 buckets (1–5, 6–20, 21–50, 51–200, 200+ messages)
-- **Model trend (weekly)** — per-model token bars per week for the last 12 weeks
-- **CLAUDE.md size tracker** — file size, estimated token overhead per message, ⚠ warning for large files
-- **Vague prompt clusters** — groups of short repetitive prompts ("yes/ok", "continue", "fix it") with total cost
+### `[7]` Analytics — Deep Usage Analytics
+- **Tool usage** — call counts, sessions used in, and token totals per tool
+- **Session length histogram** — distribution across 5 buckets (1–5, 6–20, 21–50, 51–200, 200+ messages)
+- **Model trend (weekly)** — per-model token usage for the last 12 weeks
+- **CLAUDE.md size tracker** — file size, estimated token overhead per message, ⚠ warning for bloated files
+- **Vague prompt clusters** — grouped repetitive short prompts with total token cost
 
 ---
 
-## Keyboard shortcuts
+## Keyboard Shortcuts
 
 | Key | Action |
 |---|---|
@@ -82,31 +97,38 @@ Up to 13 auto-generated behavioral insights (warnings + info). Each shows a titl
 
 ---
 
-## CLI flags
+## CLI Flags — Non-Interactive & Scriptable Mode
 
 ```bash
-# Non-interactive — great for scripts, cron, tmux status bars
-claudetop --today              # Today's token summary + burn rate
-claudetop --summary            # All-time one-liner
-claudetop --summary --days 7   # Last 7 days
-claudetop --json               # Full JSON dump to stdout
-claudetop --json | jq .totals  # Pipe to jq
+# Print today's Claude Code token usage and projected daily cost
+claudetop --today
+
+# One-line all-time summary
+claudetop --summary
+
+# Summarise last 7 days (also accepts 7d, 2w, 1m)
+claudetop --summary --days 7
+
+# Dump full parsed data as JSON (pipe to jq, scripts, cron)
+claudetop --json
+claudetop --json | jq .totals
+claudetop --json | jq '.sessions[0]'
 
 # Filters
-claudetop --days 30            # Last 30 days of data
-claudetop --since 2w           # Last 2 weeks (also accepts 7d, 1m)
-claudetop --project my-app     # Scope to one project
-claudetop --model sonnet       # Sessions using Sonnet only
+claudetop --days 30              # Last 30 days only
+claudetop --since 2w             # Last 2 weeks
+claudetop --project my-app       # Scope to one project
+claudetop --model sonnet         # Sessions using Sonnet only
 
 # Options
-claudetop --sort cost          # Default sort: tokens|date|queries|model|cost
-claudetop --no-color           # Disable ANSI colors
-claudetop --no-insights        # Skip insight generation (faster startup)
-claudetop --version            # Show version
-claudetop --help               # Show full help
+claudetop --sort cost            # Sort by: tokens | date | queries | model | cost
+claudetop --no-color             # Disable ANSI colors (for plain text pipes)
+claudetop --no-insights          # Skip insight generation (faster startup)
+claudetop --version
+claudetop --help
 ```
 
-### Example output
+### Example Output
 
 ```
 $ claudetop --today
@@ -123,40 +145,44 @@ Last 7 days: 89.3M tokens · $7.20 · 8 sessions · 1,203 queries · 5 active da
 
 ---
 
-## How it works
+## How It Works
 
-claudetop reads JSONL files that Claude Code writes to `~/.claude/projects/` — one file per session. It parses every message, pairs user prompts with assistant responses that contain `usage{}` data, and computes per-query token counts, cost, tools used, and efficiency metrics. All project directories are parsed in parallel (`Promise.all`), then aggregated once into the data object that all views read from.
+claudetop reads the JSONL session files that Claude Code writes to `~/.claude/projects/` — one file per conversation. It parses every message, pairs user prompts with assistant responses that carry `usage{}` token data, and computes per-query counts for tokens, cost, tools used, and efficiency. All projects are parsed in parallel via `Promise.all`, then aggregated into a single data object all views share.
 
-**Token cost model** — four categories are billed at different rates:
+### Token Cost Model
 
-| Category | What it is |
-|---|---|
-| Raw input | Non-cached input tokens |
-| Cache write | Prompt-cache creation (1.25× input rate) |
-| Cache read | Prompt-cache hits (0.10× input rate) |
-| Output | Generated response tokens |
+claudetop bills each token category at its correct Anthropic rate — not a flat input rate:
 
-**Data sources:**
+| Category | What it is | Example rate (Sonnet) |
+|---|---|---|
+| Raw input | Non-cached prompt tokens | $3.00 / 1M |
+| Cache write | Prompt-cache creation tokens | $3.75 / 1M |
+| Cache read | Prompt-cache hit tokens | $0.30 / 1M |
+| Output | Generated response tokens | $15.00 / 1M |
+
+### Data Sources
 
 | File | Used for |
 |---|---|
-| `~/.claude/projects/*/*.jsonl` | Per-session token data |
+| `~/.claude/projects/*/*.jsonl` | Per-session token and cost data |
 | `~/.claude/history.jsonl` | Session display names |
-| `~/.claude/projects/*/CLAUDE.md` | CLAUDE.md size tracking |
+| `~/.claude/projects/*/CLAUDE.md` | CLAUDE.md file size tracking |
+
+Nothing is ever written. Nothing is sent anywhere.
 
 ---
 
-## Project layout
+## Project Layout
 
 ```
 claudetop/
 ├── package.json
 └── src/
     ├── index.js        CLI entry point + non-interactive modes
-    ├── app.js          blessed TUI controller + keyboard bindings
-    ├── parser.js       JSONL parser, aggregations, insight engine
-    ├── formatter.js    fmt(), sparkline(), miniBar(), modelShort()…
-    ├── theme.js        blessed color tag helpers
+    ├── app.js          blessed TUI screen manager + all keyboard bindings
+    ├── parser.js       JSONL parser, cost engine, aggregations, insight generator
+    ├── formatter.js    fmt(), sparkline(), miniBar(), modelShort(), fmtDate()…
+    ├── theme.js        blessed color tag helpers (model-aware, delta-aware)
     └── views/
         ├── Dashboard.js
         ├── Daily.js
@@ -168,10 +194,17 @@ claudetop/
         └── Help.js
 ```
 
-**Dependencies:** [`blessed`](https://github.com/chjj/blessed) (terminal UI) · Node.js built-ins only for everything else. No database, no network, no build step.
+**Runtime dependencies:** [`blessed`](https://github.com/chjj/blessed) for terminal rendering · Node.js built-ins for everything else. No database, no network, no build step.
+
+---
+
+## Related
+
+- [Claude Code](https://claude.ai/code) — the Anthropic AI coding assistant this tool analyses
+- [ccusage](https://github.com/ryoppippi/ccusage) — alternative CLI usage reporter for Claude Code
 
 ---
 
 ## License
 
-MIT
+MIT © [Gaurav Ratnawat](https://github.com/GauravRatnawat)

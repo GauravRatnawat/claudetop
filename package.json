@@ -1,7 +1,7 @@
 {
   "name": "claudetop",
   "version": "1.0.0",
-  "description": "Interactive terminal dashboard for Claude Code token usage — like htop, but for Claude",
+  "description": "Interactive terminal dashboard for Claude Code token usage and cost tracking — like htop, but for Claude AI",
   "main": "src/index.js",
   "bin": {
     "claudetop": "src/index.js"
@@ -13,15 +13,38 @@
   "keywords": [
     "claude",
     "claude-code",
-    "tokens",
+    "claude-ai",
+    "anthropic",
+    "token-usage",
+    "token-cost",
+    "cost-tracking",
     "tui",
     "terminal",
+    "terminal-dashboard",
+    "cli",
     "analytics",
     "dashboard",
-    "htop"
+    "htop",
+    "ai-cost",
+    "llm-cost",
+    "llm-analytics",
+    "developer-tools",
+    "devtools",
+    "productivity"
   ],
-  "author": "",
+  "author": "Gaurav Ratnawat",
   "license": "MIT",
+  "homepage": "https://github.com/GauravRatnawat/claudetop#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GauravRatnawat/claudetop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GauravRatnawat/claudetop/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "blessed": "^0.1.81",
     "chalk": "^4.1.2"
