@@ -2,3 +2,4 @@ node_modules/
 .copilot-memory/
 *.log
 .DS_Store
+/.idea/

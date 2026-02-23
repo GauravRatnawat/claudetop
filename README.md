@@ -1,5 +1,9 @@
 # claudetop — Claude Code Token Usage Dashboard
 
+<p align="center">
+  <img src="docs/logo.svg" alt="claudetop logo" width="180" />
+</p>
+
 [![CI](https://img.shields.io/github/actions/workflow/status/GauravRatnawat/claudetop/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/GauravRatnawat/claudetop/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/claudetop?style=flat-square&color=cb3837)](https://www.npmjs.com/package/claudetop)
 [![npm downloads](https://img.shields.io/npm/dm/claudetop?style=flat-square&color=cb3837)](https://www.npmjs.com/package/claudetop)
