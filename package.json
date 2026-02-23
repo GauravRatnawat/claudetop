@@ -1,6 +1,6 @@
 {
   "name": "claudetop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Interactive terminal dashboard for Claude Code token usage and cost tracking — like htop, but for Claude AI",
   "main": "src/index.js",
   "bin": {
