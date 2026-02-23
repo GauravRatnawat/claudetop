@@ -37,7 +37,7 @@
   "homepage": "https://github.com/GauravRatnawat/claudetop#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/GauravRatnawat/claudetop.git"
+    "url": "git+https://github.com/GauravRatnawat/claudetop.git"
   },
   "bugs": {
     "url": "https://github.com/GauravRatnawat/claudetop/issues"

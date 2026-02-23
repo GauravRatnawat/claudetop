@@ -1,0 +1,12 @@
+# Internal docs — not needed by npm users
+ANALYSIS.md
+CLAUDE_TUI_ANALYSIS.md
+COST_ANALYSIS.md
+TUI_REQUIREMENTS.md
+
+# Dev
+.copilot-memory/
+.gitignore
+node_modules/
+*.log
+.DS_Store
