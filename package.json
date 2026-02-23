@@ -1,0 +1,29 @@
+{
+  "name": "claudetop",
+  "version": "1.0.0",
+  "description": "Interactive terminal dashboard for Claude Code token usage — like htop, but for Claude",
+  "main": "src/index.js",
+  "bin": {
+    "claudetop": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "tokens",
+    "tui",
+    "terminal",
+    "analytics",
+    "dashboard",
+    "htop"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "chalk": "^4.1.2"
+  }
+}
