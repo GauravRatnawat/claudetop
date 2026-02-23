@@ -1,9 +1,12 @@
 # claudetop — Claude Code Token Usage Dashboard
 
-[![npm version](https://img.shields.io/npm/v/claudetop)](https://www.npmjs.com/package/claudetop)
-[![npm downloads](https://img.shields.io/npm/dm/claudetop)](https://www.npmjs.com/package/claudetop)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node.js >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![CI](https://img.shields.io/github/actions/workflow/status/GauravRatnawat/claudetop/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/GauravRatnawat/claudetop/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/claudetop?style=flat-square&color=cb3837)](https://www.npmjs.com/package/claudetop)
+[![npm downloads](https://img.shields.io/npm/dm/claudetop?style=flat-square&color=cb3837)](https://www.npmjs.com/package/claudetop)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Node.js >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen?style=flat-square)](https://nodejs.org)
+
+**🌐 [claudetop homepage](https://gauravratnawat.github.io/claudetop/)**
 
 **claudetop** is an interactive terminal dashboard for tracking [Claude Code](https://claude.ai/code) token usage and API cost — like `htop`, but for your Claude AI spending.
 

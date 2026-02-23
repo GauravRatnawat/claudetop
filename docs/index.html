@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="claudetop — Interactive terminal dashboard for Claude Code token usage and cost tracking. Like htop, but for Claude AI." />
+  <meta name="keywords" content="claudetop, claude code, token usage, cost tracking, terminal dashboard, htop, anthropic, llm analytics, tui, cli" />
+  <meta property="og:title" content="claudetop — Claude Code Token Usage Dashboard" />
+  <meta property="og:description" content="Interactive terminal dashboard for Claude Code token usage and cost tracking — like htop, but for Claude AI." />
+  <meta property="og:url" content="https://gauravratnawat.github.io/claudetop/" />
+  <meta property="og:type" content="website" />
+  <title>claudetop — Claude Code Token Usage Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    a { color: #58a6ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Hero ── */
+    .hero {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 72px 24px 48px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 13px;
+      color: #8b949e;
+      margin-bottom: 24px;
+      letter-spacing: 0.3px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      color: #e6edf3;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span { color: #58a6ff; }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: #8b949e;
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; text-decoration: none; }
+    .btn-primary { background: #238636; color: #fff; }
+    .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+
+    /* ── Terminal demo ── */
+    .terminal-wrap {
+      max-width: 860px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+    }
+
+    .terminal {
+      background: #010409;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      overflow: hidden;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .terminal-bar {
+      background: #161b22;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-red    { background: #ff5f57; }
+    .dot-yellow { background: #febc2e; }
+    .dot-green  { background: #28c840; }
+
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      color: #484f58;
+    }
+
+    .terminal-body { padding: 20px 24px; }
+
+    .t-cyan    { color: #56d4dd; }
+    .t-green   { color: #3fb950; }
+    .t-yellow  { color: #d29922; }
+    .t-magenta { color: #bc8cff; }
+    .t-gray    { color: #484f58; }
+    .t-white   { color: #e6edf3; }
+    .t-bold    { font-weight: 700; }
+    .t-dim     { color: #484f58; }
+
+    /* ── Features ── */
+    .section {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+
+    .section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #e6edf3;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .feature-card .icon { font-size: 1.5rem; margin-bottom: 10px; }
+    .feature-card h3 { font-size: 1rem; color: #e6edf3; margin-bottom: 6px; }
+    .feature-card p { font-size: 0.875rem; color: #8b949e; }
+
+    /* ── Install ── */
+    .code-block {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 14px;
+      color: #e6edf3;
+      margin-bottom: 12px;
+      overflow-x: auto;
+    }
+
+    .code-block .prompt { color: #484f58; user-select: none; }
+    .code-block .cmd    { color: #58a6ff; }
+    .code-block .comment { color: #484f58; }
+
+    /* ── Views table ── */
+    .views-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .views-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: #161b22;
+      color: #8b949e;
+      border-bottom: 1px solid #30363d;
+      font-weight: 600;
+    }
+    .views-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #21262d;
+      color: #c9d1d9;
+      vertical-align: top;
+    }
+    .views-table tr:last-child td { border-bottom: none; }
+    .views-table .key {
+      font-family: 'SF Mono', monospace;
+      font-size: 13px;
+      color: #58a6ff;
+      white-space: nowrap;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid #21262d;
+      text-align: center;
+      padding: 32px 24px;
+      color: #484f58;
+      font-size: 13px;
+    }
+
+    footer a { color: #58a6ff; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Hero ───────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-badge">◆ Terminal · Open Source · MIT</div>
+    <h1><span>claudetop</span></h1>
+    <p>Interactive terminal dashboard for Claude Code token usage and cost tracking — like <code>htop</code>, but for Claude AI.</p>
+
+    <div class="badges">
+      <a href="https://www.npmjs.com/package/claudetop"><img src="https://img.shields.io/npm/v/claudetop?style=flat-square&color=cb3837&label=npm" alt="npm version" /></a>
+      <a href="https://www.npmjs.com/package/claudetop"><img src="https://img.shields.io/npm/dm/claudetop?style=flat-square&color=cb3837&label=downloads%2Fmonth" alt="npm downloads" /></a>
+      <a href="https://github.com/GauravRatnawat/claudetop/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/GauravRatnawat/claudetop/ci.yml?style=flat-square&label=CI" alt="CI status" /></a>
+      <a href="https://github.com/GauravRatnawat/claudetop"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="MIT License" /></a>
+      <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen?style=flat-square" alt="Node.js >=18" /></a>
+    </div>
+
+    <div class="cta-group">
+      <a class="btn btn-primary" href="https://www.npmjs.com/package/claudetop">
+        📦 Install on npm
+      </a>
+      <a class="btn btn-secondary" href="https://github.com/GauravRatnawat/claudetop">
+        ★ View on GitHub
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Terminal Preview ───────────────────────────────── -->
+  <div class="terminal-wrap">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+        <div class="terminal-title">claudetop — zsh</div>
+      </div>
+      <div class="terminal-body">
+        <pre><span class="t-bold t-cyan">  ◆ claudetop</span><span class="t-gray">  —  Token usage dashboard for Claude Code</span>
+
+<span class="t-dim">  [1] Dashboard  [2] Daily  [3] Sessions  [4] Projects  [5] Prompts  [6] Insights  [7] Analytics</span>
+
+<span class="t-bold t-white">  ┌─ OVERVIEW ─────────────────────────────────────────────────────────┐</span>
+<span class="t-gray">  │ Total Tokens          Total Cost             Sessions          Daily Avg</span>
+<span class="t-bold t-cyan">  │ 345.6M                $28.40                 33                28.8M</span>
+<span class="t-gray">  │ Feb 1 → Feb 23        avg $1.23/day           avg 2.1M/session  streak: 7d 🔥</span>
+<span class="t-bold t-white">  └────────────────────────────────────────────────────────────────────┘</span>
+
+<span class="t-bold t-white">  TODAY ──────────────────────────────────────────────────────────────</span>
+  Tokens: <span class="t-bold t-cyan">52.2M</span>   Cost: <span class="t-green">$4.12</span>   Sessions: <span class="t-cyan">3</span>   Model: <span class="t-magenta">Opus 4</span>
+  vs yesterday: <span class="t-yellow">+35%</span>
+  Burn rate: <span class="t-cyan">~62.6M tokens/day pace</span>  <span class="t-green">~$4.95/day pace</span>
+
+<span class="t-bold t-white">  THIS WEEK ──────────────────────────────────────────────────────────</span>
+  <span class="t-gray">Mon</span>  <span class="t-dim">█████████░░░░░░░░░░░░</span>  <span class="t-bold t-cyan">38.1M</span>  <span class="t-green">$3.10</span>
+  <span class="t-gray">Tue</span>  <span class="t-dim">███████████████░░░░░░</span>  <span class="t-bold t-cyan">61.2M</span>  <span class="t-green">$5.20</span>
+  <span class="t-bold t-cyan">Sun</span>  <span class="t-dim">████████░░░░░░░░░░░░░</span>  <span class="t-bold t-cyan">52.2M</span>  <span class="t-green">$4.12</span>  <span class="t-cyan">← today</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Install ────────────────────────────────────────── -->
+  <section class="section">
+    <h2>Install</h2>
+
+    <div class="code-block">
+      <span class="comment"># Run instantly without installing</span><br/>
+      <span class="prompt">$ </span><span class="cmd">npx claudetop</span>
+    </div>
+
+    <div class="code-block">
+      <span class="comment"># Install globally</span><br/>
+      <span class="prompt">$ </span><span class="cmd">npm install -g claudetop</span><br/>
+      <span class="prompt">$ </span><span class="cmd">claudetop</span>
+    </div>
+
+    <p style="color:#8b949e; font-size:14px; margin-top:8px;">
+      Requires Node.js 18+ · macOS / Linux / WSL · Terminal ≥ 80×24 · Claude Code must have been run at least once.
+    </p>
+  </section>
+
+  <!-- ── Features ──────────────────────────────────────── -->
+  <section class="section">
+    <h2>Features</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="icon">⚡</div>
+        <h3>Instant startup</h3>
+        <p>Reads <code>~/.claude/</code> directly. Renders in under a second with no server needed.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔒</div>
+        <h3>Fully offline</h3>
+        <p>Zero network calls, ever. Your prompts and session data never leave your machine.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">💰</div>
+        <h3>Accurate cost tracking</h3>
+        <p>Bills raw input, cache writes, cache reads, and output tokens at their correct Anthropic rates.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🖥️</div>
+        <h3>SSH-friendly</h3>
+        <p>Works over SSH. No browser, no port forwarding — pure terminal rendering.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔧</div>
+        <h3>Scriptable</h3>
+        <p>Use <code>--json</code>, <code>--summary</code>, <code>--today</code> for cron jobs, shell pipes, and tmux status bars.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">💡</div>
+        <h3>13 auto insights</h3>
+        <p>Detects vague prompts, model mismatch, marathon sessions, budget overruns, and more.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Views ─────────────────────────────────────────── -->
+  <section class="section">
+    <h2>7 Views</h2>
+    <table class="views-table">
+      <thead>
+        <tr><th>Key</th><th>View</th><th>What it shows</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="key">[1]</td><td>Dashboard</td><td>Stat cards, burn rate, 7-day chart, model + token breakdown, top insights</td></tr>
+        <tr><td class="key">[2]</td><td>Daily</td><td>Per-day tokens, cost, sessions with day-over-day delta, expandable detail panel</td></tr>
+        <tr><td class="key">[3]</td><td>Sessions</td><td>All sessions — searchable, sortable, filterable. Drill into every query turn</td></tr>
+        <tr><td class="key">[4]</td><td>Projects</td><td>Per-project cost with expandable top-10 most expensive prompts</td></tr>
+        <tr><td class="key">[5]</td><td>Prompts</td><td>Top 50 most expensive prompts. Vague prompts flagged with ⚠</td></tr>
+        <tr><td class="key">[6]</td><td>Insights</td><td>Up to 13 actionable behavioral insights with cost reduction tips</td></tr>
+        <tr><td class="key">[7]</td><td>Analytics</td><td>Tool usage, session histogram, weekly model trend, CLAUDE.md tracker, vague clusters</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── CLI ───────────────────────────────────────────── -->
+  <section class="section">
+    <h2>CLI — Non-interactive mode</h2>
+    <div class="code-block">
+<span class="comment"># Today's token summary + projected daily cost</span>
+<span class="prompt">$ </span><span class="cmd">claudetop --today</span>
+Today (Feb 23): 52.2M tokens · $4.12 · 3 sessions · Top model: Opus 4
+Burn rate: ~62.6M tokens/day pace · ~$4.95/day pace
+
+<span class="comment"># All-time one-liner</span>
+<span class="prompt">$ </span><span class="cmd">claudetop --summary</span>
+All time: 345.6M tokens · $28.40 · 33 sessions · streak: 7d
+
+<span class="comment"># Full JSON dump — pipe to jq</span>
+<span class="prompt">$ </span><span class="cmd">claudetop --json | jq .totals</span></div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────── -->
+  <footer>
+    <p>
+      <a href="https://github.com/GauravRatnawat/claudetop">GitHub</a> ·
+      <a href="https://www.npmjs.com/package/claudetop">npm</a> ·
+      MIT License · Built by <a href="https://github.com/GauravRatnawat">Gaurav Ratnawat</a>
+    </p>
+    <p style="margin-top:8px;">Not affiliated with Anthropic.</p>
+  </footer>
+
+</body>
+</html>
