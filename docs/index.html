@@ -544,7 +544,11 @@ Burn rate: ~62.6M tokens/day pace · ~$4.95/day pace
 All time: 345.6M tokens · $28.40 · 33 sessions · streak: 7d
 
 <span class="comment"># Full JSON dump — pipe to jq</span>
-<span class="prompt">$ </span><span class="cmd">claudetop --json | jq .totals</span></div>
+<span class="prompt">$ </span><span class="cmd">claudetop --json | jq .totals</span>
+
+<span class="comment"># tmux status-right — add to ~/.tmux.conf</span>
+<span class="prompt">$ </span><span class="cmd">set -g status-right '#(claudetop --status-bar)  '</span>
+<span class="prompt">$ </span><span class="cmd">set -g status-interval 60</span></div>
   </section>
 
   <!-- ── Footer ────────────────────────────────────────────── -->

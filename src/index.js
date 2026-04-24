@@ -22,6 +22,7 @@ Options:
   --sort <field>        Default sort: tokens|date|queries|model|cost (default: tokens)
   --no-color            Disable color output
   --no-insights         Skip insight generation (faster startup)
+  --status-bar          Print a compact one-liner for tmux/PS1 and exit
   --version, -v         Show version
   --help, -h            Show this help
 
@@ -41,6 +42,12 @@ Examples:
   claudetop --json | jq .totals Pipe data to jq
   claudetop --days 7 --summary  One-liner for last 7 days
   claudetop --sort cost         Open sorted by cost
+  claudetop --status-bar        Compact one-liner (tmux / PS1)
+
+tmux integration:
+  # In ~/.tmux.conf:
+  set -g status-right '#(claudetop --status-bar)  '
+  set -g status-interval 60
 `);
   process.exit(0);
 }
@@ -52,11 +59,12 @@ if (args.includes('--version') || args.includes('-v')) {
 }
 
 // ── Parse flags ───────────────────────────────────────────────────
-const noColor    = args.includes('--no-color');
-const noInsights = args.includes('--no-insights');
-const isJson     = args.includes('--json');
-const isSummary  = args.includes('--summary');
-const isToday    = args.includes('--today');
+const noColor     = args.includes('--no-color');
+const noInsights  = args.includes('--no-insights');
+const isJson      = args.includes('--json');
+const isSummary   = args.includes('--summary');
+const isToday     = args.includes('--today');
+const isStatusBar = args.includes('--status-bar');
 
 const daysIdx   = args.indexOf('--days') !== -1 ? args.indexOf('--days') : args.indexOf('--since');
 // Support plain numbers ("7"), day-suffixed ("7d"), and week-suffixed ("1w").
@@ -90,9 +98,9 @@ const sortKey = sortIdx !== -1 ? args[sortIdx + 1] : 'total';
 if (noColor) process.env.NO_COLOR = '1';
 
 // ── Non-interactive modes ─────────────────────────────────────────
-if (isJson || isSummary || isToday) {
+if (isJson || isSummary || isToday || isStatusBar) {
   (async () => {
-    await runNonInteractive({ isJson, isSummary, isToday, days, filterProject, filterModel, noInsights, sortKey });
+    await runNonInteractive({ isJson, isSummary, isToday, isStatusBar, days, filterProject, filterModel, noInsights, sortKey });
   })().catch(err => { console.error('Error:', err.message); process.exit(1); });
 } else {
   // ── Interactive TUI ───────────────────────────────────────────
@@ -255,6 +263,22 @@ async function runNonInteractive(opts) {
         `${daysCount} active days · ` +
         `avg ${fmt(t.dailyAvg)}/day · ` +
         `streak: ${t.streak}d\n`;
+    }
+    process.stdout.write(output, () => process.exit(0));
+    return;
+  }
+
+  if (opts.isStatusBar) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const today    = data.todayData || data.dailyUsage.find(d => d.date === todayStr);
+    let output;
+    if (!today || today.totalTokens === 0) {
+      output = '◆ —\n';
+    } else {
+      const cost  = fmtCost(today.totalCost || 0);
+      const tok   = fmt(today.totalTokens);
+      const sess  = today.sessions;
+      output = `◆ ${cost} · ${tok} tok · ${sess} sess\n`;
     }
     process.stdout.write(output, () => process.exit(0));
     return;
