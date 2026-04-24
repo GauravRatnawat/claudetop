@@ -11,66 +11,152 @@
   <link rel="canonical" href="https://gauravratnawat.com/claudetop/" />
   <meta property="og:type" content="website" />
   <title>claudetop — Claude Code Token Usage Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: #0d1117;
-      color: #c9d1d9;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      line-height: 1.6;
+    /* ── Design tokens (dark amber — matches gauravratnawat.com) ── */
+    :root {
+      --bg:        #0b0b0c;
+      --bg-elev:   #111113;
+      --ink:       #eeeae2;
+      --ink-dim:   #a8a199;
+      --ink-mute:  #6d6762;
+      --rule:      #23221f;
+      --rule-soft: #1a1917;
+      --accent:    #ff7a1a;
+      --accent-2:  #f2d9a0;
+      --good:      #7fb069;
+      --serif:     'Fraunces', ui-serif, Georgia, serif;
+      --sans:      'Inter Tight', system-ui, -apple-system, sans-serif;
+      --mono:      'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+      --maxw:      880px;
+      --gutter:    clamp(16px, 3vw, 40px);
     }
 
-    a { color: #58a6ff; text-decoration: none; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink-dim);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      font-feature-settings: "ss01", "cv11";
+      padding-top: 56px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      color: var(--accent-2);
+    }
+
+    /* ── Grain overlay ── */
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.06;
+      mix-blend-mode: overlay;
+    }
+
+    /* ── Fixed frame border ── */
+    .frame {
+      position: fixed;
+      inset: 14px;
+      border: 1px solid var(--rule);
+      pointer-events: none;
+      z-index: 55;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(20px, 4vw, 48px);
+      border-bottom: 1px solid var(--rule);
+      backdrop-filter: blur(10px);
+      background: rgba(11, 11, 12, 0.82);
+    }
+
+    .nav-brand {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-mute);
+      letter-spacing: 0.05em;
+    }
+
+    .nav-brand strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .nav-back {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink-mute);
+      letter-spacing: 0.04em;
+      transition: color 0.15s;
+    }
+
+    .nav-back:hover { color: var(--accent); text-decoration: none; }
 
     /* ── Hero ── */
     .hero {
-      max-width: 860px;
+      max-width: var(--maxw);
       margin: 0 auto;
-      padding: 80px 24px 48px;
+      padding: 88px var(--gutter) 56px;
       text-align: center;
     }
 
     .hero-badge {
       display: inline-block;
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 20px;
+      border: 1px solid var(--rule);
       padding: 4px 14px;
-      font-size: 13px;
-      color: #8b949e;
-      margin-bottom: 32px;
-      letter-spacing: 0.3px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-mute);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 36px;
     }
 
     .hero h1 {
-      font-size: clamp(2.6rem, 6vw, 4rem);
-      font-weight: 800;
-      color: #e6edf3;
-      letter-spacing: -1px;
-      margin-bottom: 20px;
-      line-height: 1.1;
+      font-family: var(--serif);
+      font-size: clamp(3rem, 8vw, 5rem);
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
+      line-height: 1.0;
     }
 
     .hero h1 .diamond {
-      color: #56d4dd;
-      text-shadow: 0 0 24px rgba(86, 212, 221, 0.6), 0 0 48px rgba(86, 212, 221, 0.2);
+      color: var(--accent);
+      text-shadow: 0 0 24px rgba(255, 122, 26, 0.55), 0 0 56px rgba(255, 122, 26, 0.2);
       margin-right: 6px;
     }
 
-    .hero h1 .name {
-      background: linear-gradient(135deg, #e6edf3 0%, #58a6ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
     .hero p {
-      font-size: 1.15rem;
-      color: #8b949e;
-      max-width: 600px;
-      margin: 0 auto 32px;
+      font-size: 1.05rem;
+      color: var(--ink-dim);
+      max-width: 560px;
+      margin: 0 auto 36px;
+      font-weight: 300;
     }
 
     .badges {
@@ -92,40 +178,54 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
+      padding: 10px 22px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      border: 1px solid transparent;
       transition: opacity 0.15s;
     }
-    .btn:hover { opacity: 0.85; text-decoration: none; }
-    .btn-primary { background: #238636; color: #fff; }
-    .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+
+    .btn:hover { opacity: 0.78; text-decoration: none; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0b0b0c;
+      border-color: var(--accent);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink-dim);
+      border-color: var(--rule);
+    }
+
+    .btn-secondary:hover { border-color: var(--ink-mute); }
 
     /* ── Terminal demo ── */
     .terminal-wrap {
-      max-width: 860px;
+      max-width: var(--maxw);
       margin: 0 auto 64px;
-      padding: 0 24px;
+      padding: 0 var(--gutter);
     }
 
     .terminal {
-      background: #010409;
-      border: 1px solid #30363d;
-      border-radius: 12px;
+      background: #0a0d0a;
+      border: 1px solid var(--rule);
       overflow: hidden;
-      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-family: var(--mono);
       font-size: 13px;
       line-height: 1.5;
     }
 
     .terminal-bar {
-      background: #161b22;
+      background: var(--bg-elev);
       padding: 10px 16px;
       display: flex;
       align-items: center;
       gap: 8px;
-      border-bottom: 1px solid #30363d;
+      border-bottom: 1px solid var(--rule);
     }
 
     .dot { width: 12px; height: 12px; border-radius: 50%; }
@@ -136,110 +236,166 @@
     .terminal-title {
       flex: 1;
       text-align: center;
-      font-size: 12px;
-      color: #484f58;
+      font-size: 11px;
+      color: var(--ink-mute);
+      letter-spacing: 0.05em;
     }
 
     .terminal-body { padding: 20px 24px; }
 
+    /* Terminal ANSI colors — fixed, not themed */
     .t-cyan    { color: #56d4dd; }
     .t-green   { color: #3fb950; }
     .t-yellow  { color: #d29922; }
     .t-magenta { color: #bc8cff; }
     .t-gray    { color: #484f58; }
-    .t-white   { color: #e6edf3; }
+    .t-white   { color: #eeeae2; }
     .t-bold    { font-weight: 700; }
     .t-dim     { color: #484f58; }
 
-    /* ── Features ── */
+    /* ── Sections ── */
     .section {
-      max-width: 860px;
+      max-width: var(--maxw);
       margin: 0 auto;
-      padding: 0 24px 64px;
+      padding: 0 var(--gutter) 64px;
     }
 
     .section h2 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #e6edf3;
+      font-family: var(--serif);
+      font-size: 1.45rem;
+      font-weight: 400;
+      color: var(--ink);
       margin-bottom: 24px;
       padding-bottom: 12px;
-      border-bottom: 1px solid #21262d;
+      border-bottom: 1px solid var(--rule);
     }
 
+    /* ── Feature grid — 1px rule dividers ── */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      gap: 1px;
     }
 
     .feature-card {
-      background: #161b22;
-      border: 1px solid #21262d;
-      border-radius: 10px;
-      padding: 20px;
+      background: var(--bg);
+      padding: 22px 20px;
     }
 
-    .feature-card .icon { font-size: 1.5rem; margin-bottom: 10px; }
-    .feature-card h3 { font-size: 1rem; color: #e6edf3; margin-bottom: 6px; }
-    .feature-card p { font-size: 0.875rem; color: #8b949e; }
+    .feature-card .icon {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      display: block;
+    }
 
-    /* ── Install ── */
+    .feature-card h3 {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .feature-card p {
+      font-size: 13px;
+      color: var(--ink-mute);
+      line-height: 1.6;
+    }
+
+    /* ── Code blocks ── */
     .code-block {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 8px;
+      background: var(--bg-elev);
+      border: 1px solid var(--rule);
       padding: 16px 20px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
-      font-size: 14px;
-      color: #e6edf3;
-      margin-bottom: 12px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--ink);
+      margin-bottom: 10px;
       overflow-x: auto;
+      line-height: 1.75;
     }
 
-    .code-block .prompt { color: #484f58; user-select: none; }
-    .code-block .cmd    { color: #58a6ff; }
-    .code-block .comment { color: #484f58; }
+    .code-block .prompt  { color: var(--ink-mute); user-select: none; }
+    .code-block .cmd     { color: var(--accent-2); }
+    .code-block .comment { color: var(--ink-mute); }
 
     /* ── Views table ── */
-    .views-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .views-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--rule);
+    }
+
     .views-table th {
       text-align: left;
       padding: 10px 14px;
-      background: #161b22;
-      color: #8b949e;
-      border-bottom: 1px solid #30363d;
-      font-weight: 600;
+      background: var(--bg-elev);
+      color: var(--ink-mute);
+      border-bottom: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
+
     .views-table td {
       padding: 10px 14px;
-      border-bottom: 1px solid #21262d;
-      color: #c9d1d9;
+      border-bottom: 1px solid var(--rule-soft);
+      color: var(--ink-dim);
       vertical-align: top;
+      font-size: 14px;
     }
+
     .views-table tr:last-child td { border-bottom: none; }
+
     .views-table .key {
-      font-family: 'SF Mono', monospace;
-      font-size: 13px;
-      color: #58a6ff;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
       white-space: nowrap;
     }
 
     /* ── Footer ── */
     footer {
-      border-top: 1px solid #21262d;
+      border-top: 1px solid var(--rule);
       text-align: center;
-      padding: 32px 24px;
-      color: #484f58;
-      font-size: 13px;
+      padding: 40px var(--gutter) 48px;
+      color: var(--ink-mute);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.04em;
     }
 
-    footer a { color: #58a6ff; }
+    footer a { color: var(--ink-mute); }
+    footer a:hover { color: var(--accent); text-decoration: none; }
+    footer .sep { margin: 0 6px; opacity: 0.4; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .hero { padding-top: 56px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .terminal-body { padding: 16px; }
+      .frame { display: none; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- ── Hero ───────────────────────────────────────────── -->
+  <div class="grain" aria-hidden="true"></div>
+  <div class="frame" aria-hidden="true"></div>
+
+  <!-- ── Nav ─────────────────────────────────────────────── -->
+  <nav>
+    <span class="nav-brand"><strong>GR</strong> · claudetop</span>
+    <a class="nav-back" href="https://gauravratnawat.com">← gauravratnawat.com</a>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────── -->
   <section class="hero">
     <div class="hero-badge">◆ Terminal · Open Source · MIT</div>
     <h1><span class="diamond">◆</span> claudetop</h1>
@@ -254,16 +410,12 @@
     </div>
 
     <div class="cta-group">
-      <a class="btn btn-primary" href="https://www.npmjs.com/package/claudetop">
-        📦 Install on npm
-      </a>
-      <a class="btn btn-secondary" href="https://github.com/GauravRatnawat/claudetop">
-        ★ View on GitHub
-      </a>
+      <a class="btn btn-primary" href="https://www.npmjs.com/package/claudetop">↓ Install on npm</a>
+      <a class="btn btn-secondary" href="https://github.com/GauravRatnawat/claudetop">★ View on GitHub</a>
     </div>
   </section>
 
-  <!-- ── Terminal Preview ───────────────────────────────── -->
+  <!-- ── Terminal Preview ──────────────────────────────────── -->
   <div class="terminal-wrap">
     <div class="terminal">
       <div class="terminal-bar">
@@ -296,7 +448,7 @@
     </div>
   </div>
 
-  <!-- ── Install ────────────────────────────────────────── -->
+  <!-- ── Install ───────────────────────────────────────────── -->
   <section class="section">
     <h2>Install</h2>
 
@@ -317,49 +469,49 @@
       <span class="prompt">$ </span><span class="cmd">claudetop</span>
     </div>
 
-    <p style="color:#8b949e; font-size:14px; margin-top:8px;">
+    <p style="color: var(--ink-mute); font-family: var(--mono); font-size: 12px; margin-top: 10px; letter-spacing: 0.02em;">
       Requires Node.js 18+ · macOS / Linux / WSL · Terminal ≥ 80×24 · Claude Code must have been run at least once.
     </p>
   </section>
 
-  <!-- ── Features ──────────────────────────────────────── -->
+  <!-- ── Features ─────────────────────────────────────────── -->
   <section class="section">
     <h2>Features</h2>
     <div class="features-grid">
       <div class="feature-card">
-        <div class="icon">⚡</div>
+        <span class="icon">⚡</span>
         <h3>Instant startup</h3>
         <p>Reads <code>~/.claude/</code> directly. Renders in under a second with no server needed.</p>
       </div>
       <div class="feature-card">
-        <div class="icon">🔒</div>
+        <span class="icon">🔒</span>
         <h3>Fully offline</h3>
         <p>Zero network calls, ever. Your prompts and session data never leave your machine.</p>
       </div>
       <div class="feature-card">
-        <div class="icon">💰</div>
+        <span class="icon">💰</span>
         <h3>Accurate cost tracking</h3>
-        <p>Bills raw input, cache writes, cache reads, and output tokens at their correct Anthropic rates.</p>
+        <p>Bills raw input, cache writes, cache reads, and output tokens at correct Anthropic rates.</p>
       </div>
       <div class="feature-card">
-        <div class="icon">🖥️</div>
+        <span class="icon">🖥️</span>
         <h3>SSH-friendly</h3>
         <p>Works over SSH. No browser, no port forwarding — pure terminal rendering.</p>
       </div>
       <div class="feature-card">
-        <div class="icon">🔧</div>
+        <span class="icon">🔧</span>
         <h3>Scriptable</h3>
         <p>Use <code>--json</code>, <code>--summary</code>, <code>--today</code> for cron jobs, shell pipes, and tmux status bars.</p>
       </div>
       <div class="feature-card">
-        <div class="icon">💡</div>
+        <span class="icon">💡</span>
         <h3>13 auto insights</h3>
         <p>Detects vague prompts, model mismatch, marathon sessions, budget overruns, and more.</p>
       </div>
     </div>
   </section>
 
-  <!-- ── Views ─────────────────────────────────────────── -->
+  <!-- ── Views ─────────────────────────────────────────────── -->
   <section class="section">
     <h2>7 Views</h2>
     <table class="views-table">
@@ -378,7 +530,7 @@
     </table>
   </section>
 
-  <!-- ── CLI ───────────────────────────────────────────── -->
+  <!-- ── CLI ───────────────────────────────────────────────── -->
   <section class="section">
     <h2>CLI — Non-interactive mode</h2>
     <div class="code-block">
@@ -395,14 +547,18 @@ All time: 345.6M tokens · $28.40 · 33 sessions · streak: 7d
 <span class="prompt">$ </span><span class="cmd">claudetop --json | jq .totals</span></div>
   </section>
 
-  <!-- ── Footer ────────────────────────────────────────── -->
+  <!-- ── Footer ────────────────────────────────────────────── -->
   <footer>
     <p>
-      <a href="https://github.com/GauravRatnawat/claudetop">GitHub</a> ·
-      <a href="https://www.npmjs.com/package/claudetop">npm</a> ·
-      MIT License · Built by <a href="https://github.com/GauravRatnawat">Gaurav Ratnawat</a>
+      <a href="https://github.com/GauravRatnawat/claudetop">GitHub</a>
+      <span class="sep">·</span>
+      <a href="https://www.npmjs.com/package/claudetop">npm</a>
+      <span class="sep">·</span>
+      MIT License
+      <span class="sep">·</span>
+      Built by <a href="https://gauravratnawat.com">Gaurav Ratnawat</a>
     </p>
-    <p style="margin-top:8px;">Not affiliated with Anthropic.</p>
+    <p style="margin-top: 8px; opacity: 0.5;">Not affiliated with Anthropic.</p>
   </footer>
 
 </body>
