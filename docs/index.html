@@ -501,7 +501,7 @@
       <div class="feature-card">
         <span class="icon">🔧</span>
         <h3>Scriptable</h3>
-        <p>Use <code>--json</code>, <code>--summary</code>, <code>--today</code> for cron jobs, shell pipes, and tmux status bars.</p>
+        <p>Use <code>--json</code>, <code>--summary</code>, <code>--today</code>, <code>--status-bar</code> for cron jobs, shell pipes, and tmux status lines.</p>
       </div>
       <div class="feature-card">
         <span class="icon">💡</span>
@@ -536,7 +536,7 @@
     <div class="code-block">
 <span class="comment"># Today's token summary + projected daily cost</span>
 <span class="prompt">$ </span><span class="cmd">claudetop --today</span>
-Today (Feb 23): 52.2M tokens · $4.12 · 3 sessions · Top model: Opus 4
+Today (Apr 25): 52.2M tokens · $4.12 · 3 sessions · Top model: Opus 4
 Burn rate: ~62.6M tokens/day pace · ~$4.95/day pace
 
 <span class="comment"># All-time one-liner</span>
@@ -546,9 +546,14 @@ All time: 345.6M tokens · $28.40 · 33 sessions · streak: 7d
 <span class="comment"># Full JSON dump — pipe to jq</span>
 <span class="prompt">$ </span><span class="cmd">claudetop --json | jq .totals</span>
 
-<span class="comment"># tmux status-right — add to ~/.tmux.conf</span>
-<span class="prompt">$ </span><span class="cmd">set -g status-right '#(claudetop --status-bar)  '</span>
-<span class="prompt">$ </span><span class="cmd">set -g status-interval 60</span></div>
+<span class="comment"># Compact status-bar line (tmux / PS1)</span>
+<span class="prompt">$ </span><span class="cmd">claudetop --status-bar</span>
+◆ $4.12 · 52.2M tok · 3 sess</div>
+
+    <div class="code-block">
+<span class="comment"># ~/.tmux.conf — live spend in your status bar, refreshes every 60s</span>
+set -g status-right '<span class="cmd">#(claudetop --status-bar)  </span>'
+set -g status-interval <span class="cmd">60</span></div>
   </section>
 
   <!-- ── Footer ────────────────────────────────────────────── -->
