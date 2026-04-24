@@ -5,31 +5,40 @@ const os = require('os');
 const readline = require('readline');
 
 // ── Pricing table (per million tokens) ──────────────────────────────
-// Source: https://www.anthropic.com/pricing  (February 2026)
+// Source: https://www.anthropic.com/pricing  (April 2026)
 // Four categories are billed at different rates:
 //   input        — raw (non-cached) input tokens
 //   cacheWrite   — prompt-cache creation tokens (1.25× input)
 //   cacheRead    — prompt-cache read tokens     (0.10× input)
 //   output       — generated output tokens
-const MODEL_PRICING = {
-  // Opus 4 / 3
-  'claude-opus-4':   { input: 15,    cacheWrite: 18.75, cacheRead: 1.50, output: 75   },
-  'claude-opus-3':   { input: 15,    cacheWrite: 18.75, cacheRead: 1.50, output: 75   },
-  // Sonnet 4 / 3.7 / 3.5 / 3
-  'claude-sonnet-4': { input: 3,     cacheWrite: 3.75,  cacheRead: 0.30, output: 15   },
-  'claude-sonnet-3': { input: 3,     cacheWrite: 3.75,  cacheRead: 0.30, output: 15   },
-  // Haiku 3.5 / 3
-  'claude-haiku-3':  { input: 0.80,  cacheWrite: 1.00,  cacheRead: 0.08, output: 4    },
-};
+//
+// Rules are checked in order — first match wins. More specific patterns
+// must come before broader ones (e.g. 'opus-4-7' before 'opus-4').
+// Opus 4.5+ is a cheaper tier ($5/$25) than Opus 4.0/4.1 ($15/$75).
+const PRICING_RULES = [
+  // Opus 4.5 / 4.6 / 4.7 — standard Opus tier
+  { pattern: 'opus-4-5', price: { input: 5,    cacheWrite: 6.25,  cacheRead: 0.50, output: 25 } },
+  { pattern: 'opus-4-6', price: { input: 5,    cacheWrite: 6.25,  cacheRead: 0.50, output: 25 } },
+  { pattern: 'opus-4-7', price: { input: 5,    cacheWrite: 6.25,  cacheRead: 0.50, output: 25 } },
+  // Opus 4.0 / 4.1 — legacy expensive tier
+  { pattern: 'opus-4',   price: { input: 15,   cacheWrite: 18.75, cacheRead: 1.50, output: 75 } },
+  // Opus 3 and any unrecognised Opus
+  { pattern: 'opus',     price: { input: 15,   cacheWrite: 18.75, cacheRead: 1.50, output: 75 } },
+  // Sonnet — pricing stable across 3/4 generations
+  { pattern: 'sonnet',   price: { input: 3,    cacheWrite: 3.75,  cacheRead: 0.30, output: 15 } },
+  // Haiku 4.x
+  { pattern: 'haiku-4',  price: { input: 1,    cacheWrite: 1.25,  cacheRead: 0.10, output: 5  } },
+  // Haiku 3.x and any unrecognised Haiku
+  { pattern: 'haiku',    price: { input: 0.80, cacheWrite: 1.00,  cacheRead: 0.08, output: 4  } },
+];
 const DEFAULT_PRICING = { input: 3, cacheWrite: 3.75, cacheRead: 0.30, output: 15 };
 
 function getPricing(model) {
   if (!model) return DEFAULT_PRICING;
-  for (const [key, price] of Object.entries(MODEL_PRICING)) {
-    if (model.toLowerCase().includes(key.split('-').slice(1).join('-'))) return price;
+  const m = model.toLowerCase();
+  for (const { pattern, price } of PRICING_RULES) {
+    if (m.includes(pattern)) return price;
   }
-  if (model.includes('opus'))   return MODEL_PRICING['claude-opus-4'];
-  if (model.includes('haiku'))  return MODEL_PRICING['claude-haiku-3'];
   return DEFAULT_PRICING;
 }
 
