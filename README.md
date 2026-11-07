@@ -185,25 +185,7 @@ Nothing is ever written. Nothing is sent anywhere.
 
 ## Project Layout
 
-```
-claudetop/
-├── package.json
-└── src/
-    ├── index.js        CLI entry point + non-interactive modes
-    ├── app.js          blessed TUI screen manager + all keyboard bindings
-    ├── parser.js       JSONL parser, cost engine, aggregations, insight generator
-    ├── formatter.js    fmt(), sparkline(), miniBar(), modelShort(), fmtDate()…
-    ├── theme.js        blessed color tag helpers (model-aware, delta-aware)
-    └── views/
-        ├── Dashboard.js
-        ├── Daily.js
-        ├── Sessions.js
-        ├── Projects.js
-        ├── Prompts.js
-        ├── Insights.js
-        ├── Analytics.js
-        └── Help.js
-```
+Source map: [CLI flags and text output](src/index.js), [TUI and keys](src/app.js), [session parsing, costs, insights](src/parser.js), [text format helpers](src/formatter.js), [color tags](src/theme.js), [view renderers](src/views/).
 
 **Runtime dependencies:** [`blessed`](https://github.com/chjj/blessed) for terminal rendering · Node.js built-ins for everything else. No database, no network, no build step.
 
